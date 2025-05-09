@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="index.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script type="text/javascript">
+
+        function salvar() {
+            const inputNome = document.getElementById("input-nome");
+            const inputSobrenome = document.getElementById("input-sobrenome");
+
+            const cadastrosList = JSON.parse(localStorage.getItem("cadastro-db")) || [];
+            console.log(">>>", JSON.stringify(cadastrosList));
+            cadastrosList.push({
+                nome: inputNome.value,
+                sobrenome: inputSobrenome.value,
+            });
+
+            console.log(">>>", JSON.stringify(cadastrosList));
+
+            localStorage.setItem("cadastro-db", JSON.stringify(cadastrosList));
+            criarTable();
+        }
+
+        function criarTable() {
+            const cadastrosList = JSON.parse(localStorage.getItem("cadastro-db")) || [];
+
+            $("#tabelaCadastroBody").empty();
+            for(const idx in cadastrosList) {
+                console.log(">>>", idx);
+                let linha = $('<tr/>')
+                linha.append($('<td/>').html(Number(idx) + 1));
+                linha.append($('<td/>').html(cadastrosList[idx].nome));
+                linha.append($('<td/>').html(cadastrosList[idx].sobrenome));
+                $('#tabelaCadastro').append(linha);
+            }
+        }
+
+    </script>
+</head>
+<body onload="criarTable()">
+    <div class="container">
+        <div class="painel-cadastro">
+            <div class="campos">
+                <label for="">Nome:</label>
+                <input type="text" id="input-nome">
+            </div>
+            <div class="campos">
+                <label for="">Sobrenome:</label>
+                <input type="text" id="input-sobrenome">
+            </div>
+            <div class="campos">
+                <button onclick="salvar()">Salvar</button>
+            </div>
+        </div>
+        <div class="painel-tabela">
+            <table id="tabelaCadastro">
+                <thead>
+                    <tr>
+                        <td>ID</td>
+                        <td>Nome</td>
+                        <td>Sobrenome</td>
+                    </tr>
+                    <tbody id="tabelaCadastroBody">
+
+                    </tbody>
+                </thead>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
