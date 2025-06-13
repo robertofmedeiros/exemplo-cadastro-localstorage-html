@@ -1,56 +1,86 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <link rel="stylesheet" href="index.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script type="text/javascript">
 
-        function salvar() {
-            const inputNome = document.getElementById("input-nome");
-            const inputSobrenome = document.getElementById("input-sobrenome");
+        function salvar(idCliente) {
+            const inputModelo = document.getElementById("input-modelo");
+            const inputAnoFabricacao = document.getElementById("input-anoFabricacao");
+            const inputCor = document.getElementById("input-cor");
 
-            const cadastrosList = JSON.parse(localStorage.getItem("cadastro-db")) || [];
-            console.log(">>>", JSON.stringify(cadastrosList));
-            cadastrosList.push({
-                nome: inputNome.value,
-                sobrenome: inputSobrenome.value,
+            const data = {
+                modelo: inputModelo.value,
+                anoFabricacao: inputAnoFabricacao.value,
+                cor: inputCor.value
+            };
+
+            if (idCliente) {
+                axios.put("https://cadastro-carros-nestjs-api.vercel.app/carros/", data).then(resposta => {
+                    if (resposta.status === 200) {
+                        aler("Registro atualizado com sucesso!");
+                        criarTable();
+                        return;
+                    }
+                })
+                .catch(error => {
+                    alert('Erro ao fazer a requisição:', error);
+                });
+            }
+
+            axios.post("https://cadastro-carros-nestjs-api.vercel.app/carros/", data).then(resposta => {
+                console.log(">>>", resposta.status);
+                if (resposta.status === 201) {
+                    alert("Registro criado com sucesso!");
+                    criarTable();
+                    return;
+                }
+            })
+            .catch(error => {
+                alert('Erro ao fazer a requisição:', error);
             });
-
-            console.log(">>>", JSON.stringify(cadastrosList));
-
-            localStorage.setItem("cadastro-db", JSON.stringify(cadastrosList));
-            criarTable();
         }
 
         function criarTable() {
-            const cadastrosList = JSON.parse(localStorage.getItem("cadastro-db")) || [];
 
-            $("#tabelaCadastroBody").empty();
-            for(const idx in cadastrosList) {
-                console.log(">>>", idx);
-                let linha = $('<tr/>')
-                linha.append($('<td/>').html(Number(idx) + 1));
-                linha.append($('<td/>').html(cadastrosList[idx].nome));
-                linha.append($('<td/>').html(cadastrosList[idx].sobrenome));
-                $('#tabelaCadastro').append(linha);
-            }
+            axios.get("https://cadastro-carros-nestjs-api.vercel.app/carros/").then(resposta => {
+                if (resposta.status === 200) {
+                    $("#tabelaCadastroBody").empty();
+                    for (const carro of resposta.data) {
+                        let linha = $('<tr/>')
+                        linha.append($('<td/>').html(carro.id));
+                        linha.append($('<td/>').html(carro.modelo));
+                        linha.append($('<td/>').html(carro.anoFabricacao));
+                        linha.append($('<td/>').html(carro.cor));
+                        $('#tabelaCadastro').append(linha);
+                    }
+                }
+            })
         }
 
     </script>
 </head>
+
 <body onload="criarTable()">
     <div class="container">
         <div class="painel-cadastro">
             <div class="campos">
-                <label for="">Nome:</label>
-                <input type="text" id="input-nome">
+                <label for="">Modelo:</label>
+                <input type="text" id="input-modelo">
             </div>
             <div class="campos">
-                <label for="">Sobrenome:</label>
-                <input type="text" id="input-sobrenome">
+                <label for="">Ano de Fabricação:</label>
+                <input type="text" id="input-anoFabricacao">
+            </div>
+            <div class="campos">
+                <label for="">Cor:</label>
+                <input type="text" id="input-cor">
             </div>
             <div class="campos">
                 <button onclick="salvar()">Salvar</button>
@@ -61,15 +91,17 @@
                 <thead>
                     <tr>
                         <td>ID</td>
-                        <td>Nome</td>
-                        <td>Sobrenome</td>
+                        <td>Modelo</td>
+                        <td>Ano deFabricação</td>
+                        <td>Cor</td>
                     </tr>
-                    <tbody id="tabelaCadastroBody">
+                <tbody id="tabelaCadastroBody">
 
-                    </tbody>
+                </tbody>
                 </thead>
             </table>
         </div>
     </div>
 </body>
+
 </html>
